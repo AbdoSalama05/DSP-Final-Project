@@ -1,22 +1,21 @@
 %% Load ECG data
 load('ecg_data.mat');
 
-%% Design FIR High Pass Filter
-firStandardOrder = 500;
-[firHighPassOrder, ~, beta, ~] = kaiserord([0.3 0.5], [0 1], [0.01 0.01], samplingFrequency);
-if mod(firHighPassOrder, 2) ~= 0
-    firHighPassOrder = firHighPassOrder + 1;
-end
-firHighPassOrder = min(firHighPassOrder, 1100);
-firHighPassNumerator = fir1(firHighPassOrder, 0.5 / (samplingFrequency / 2), 'high', kaiser(firHighPassOrder + 1, beta));
+%% Design FIR Filters
+firOrder = 500;
+firHighPassOrder = firOrder;
+firStandardOrder = firOrder;
+
+% High-pass FIR filter
+firHighPassNumerator = fir1(firOrder, 0.5 / (samplingFrequency / 2), 'high');
 firHighPassDenominator = 1;
 
-%% Design FIR Notch Filter at 50 Hz
-firNotchNumerator = fir1(firStandardOrder, [49.5 50.5] / (samplingFrequency / 2), 'stop', hamming(firStandardOrder + 1));
+% Notch FIR band-stop filter at 50 Hz
+firNotchNumerator = fir1(firOrder, [49 51] / (samplingFrequency / 2), 'stop');
 firNotchDenominator = 1;
 
-%% Design FIR Low-Pass Filter
-firLowPassNumerator = fir1(firStandardOrder, 100 / (samplingFrequency / 2), 'low', hamming(firStandardOrder + 1));
+% Low-pass FIR filter
+firLowPassNumerator = fir1(firOrder, 100 / (samplingFrequency / 2), 'low');
 firLowPassDenominator = 1;
 
 %% Plot Frequency Responses
@@ -134,7 +133,7 @@ disp(firLowPassNumerator(1:10));
 %% Verify Specs Compliance
 firHpSampleIndices = (0:firHighPassOrder);
 firStdSampleIndices = (0:firStandardOrder);
-notchSampleIndices = (0:firStandardOrder);
+notchSampleIndices = (0:firOrder);
 
 hpPassbandGain = 20 * log10(abs(firHighPassNumerator * exp(-1j * 2 * pi * 10 / samplingFrequency * firHpSampleIndices)'));
 hpStopbandAttenuation_01 = 20 * log10(abs(firHighPassNumerator * exp(-1j * 2 * pi * 0.1 / samplingFrequency * firHpSampleIndices)'));
