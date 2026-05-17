@@ -6,7 +6,7 @@ load('ecg_data.mat');
 
 %% Design Notch Filter at 50 Hz
 normalizedNotchFreq = 50 / (samplingFrequency / 2);
-notchBandwidth = normalizedNotchFreq / 35;
+notchBandwidth = normalizedNotchFreq / 50;
 [notchNumerator, notchDenominator] = iirnotch(normalizedNotchFreq, notchBandwidth);
 
 %% Design Butterworth Low-Pass Filter
@@ -137,7 +137,6 @@ hpStopbandAttenuation = 20 * log10(abs(highPassFreqResponse(find(highPassFreqAxi
 lpPassbandGain = 20 * log10(abs(lowPassFreqResponse(find(lowPassFreqAxis >= 90, 1))));
 lpStopbandAttenuation = 20 * log10(abs(lowPassFreqResponse(find(lowPassFreqAxis >= 150, 1))));
 
-% Exact notch attenuation at 50.000 Hz using direct frequency evaluation
 notchExactFreqVector = exp(-1j * 2 * pi * 50 / samplingFrequency * (0:2));
 notchExactAttenuation = 20 * log10(abs(notchNumerator * notchExactFreqVector') / abs(notchDenominator * notchExactFreqVector'));
 
