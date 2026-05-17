@@ -1,6 +1,5 @@
 %% Step 1: Load ECG Signal and Add Noise
-addpath('C:\Users\PolaNasser\Downloads\wfdb-app-toolbox-0-10-0\mcode')
-samplingFrequency=360;
+addpath('C:\Users\HP\Downloads\wfdb-app-toolbox-0-10-0\mcode')
 [rawSignal,samplingFrequency,timeVector]=rdsamp('100',[],3600);
 rawEcgSignal=rawSignal(:,1);
 timeAxis=timeVector(:);

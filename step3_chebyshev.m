@@ -1,7 +1,7 @@
 %% Step 3: Chebyshev Type I Filter Design and Application
 load('ecg_data.mat');
 %% Design Filters
-passbandRippleDb=0.25;
+passbandRippleDb=1;
 [chebyshevHpNumerator,chebyshevHpDenominator]=cheby1(4,passbandRippleDb,0.5/(samplingFrequency/2),'high');
 
 normalizedNotchFreq=50/(samplingFrequency/2);
