@@ -6,7 +6,7 @@ load('ecg_data.mat');
 
 %% Design Notch Filter at 50 Hz
 normalizedNotchFreq = 50 / (samplingFrequency / 2);
-notchBandwidth = normalizedNotchFreq / 50;   %divide by quality factor =50
+notchBandwidth = normalizedNotchFreq / 35;
 [notchNumerator, notchDenominator] = iirnotch(normalizedNotchFreq, notchBandwidth);
 
 %% Design Butterworth Low-Pass Filter
