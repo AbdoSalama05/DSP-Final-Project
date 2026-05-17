@@ -1,5 +1,5 @@
 %% Load ECG Signal
-addpath('C:\Users\HP\Downloads\wfdb-app-toolbox-0-10-0\mcode')
+addpath('C:\Users\PolaNasser\Downloads\wfdb-app-toolbox-0-10-0\mcode')
 samplingFrequency = 360;
 totalSamples = 3600;
 [rawSignal, samplingFrequency, timeVector] = rdsamp('100', [], totalSamples);
@@ -18,8 +18,10 @@ grid on;
 %% Add Synthetic Noise
 baselineWanderNoise = 0.3 * sin(2 * pi * 0.3 * timeAxis);
 powerlineInterferenceNoise = 0.2 * sin(2 * pi * 50 * timeAxis);
-emgMusclNoise = 0.1 * randn(size(timeAxis));  
-noisyEcgSignal = cleanEcgSignal + baselineWanderNoise + powerlineInterferenceNoise + emgMusclNoise;
+emgRaw = 0.05 * randn(size(timeAxis));
+[bEmg, aEmg] = butter(4, [20 150]/(samplingFrequency/2), 'bandpass');
+
+emgMusclNoise = filtfilt(bEmg, aEmg, emgRaw);noisyEcgSignal = cleanEcgSignal + baselineWanderNoise + powerlineInterferenceNoise + emgMusclNoise;
 
 %% Plot Clean vs Noisy
 figure;
