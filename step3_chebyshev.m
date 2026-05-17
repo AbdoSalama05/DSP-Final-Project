@@ -7,7 +7,7 @@ passbandRippleDb = 0.25;
 
 %% Design Notch Filter at 50 Hz
 normalizedNotchFreq = 50 / (samplingFrequency / 2);
-notchBandwidth = normalizedNotchFreq / 35;
+notchBandwidth = normalizedNotchFreq / 50;
 [chebyshevNotchNumerator, chebyshevNotchDenominator] = iirnotch(normalizedNotchFreq, notchBandwidth);
 
 %% Design Chebyshev Type I Low-Pass Filter
