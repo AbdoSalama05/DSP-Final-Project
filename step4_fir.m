@@ -11,10 +11,9 @@ firHighPassOrder = min(firHighPassOrder, 1100);
 firHighPassNumerator = fir1(firHighPassOrder, 0.5 / (samplingFrequency / 2), 'high', kaiser(firHighPassOrder + 1, beta));
 firHighPassDenominator = 1;
 
-%% Design Notch Filter at 50 Hz
-normalizedNotchFreq = 50 / (samplingFrequency / 2);
-notchBandwidth = normalizedNotchFreq / 35;
-[firNotchNumerator, firNotchDenominator] = iirnotch(normalizedNotchFreq, notchBandwidth);
+%% Design FIR Notch Filter at 50 Hz
+firNotchNumerator = fir1(firStandardOrder, [49.5 50.5] / (samplingFrequency / 2), 'stop', hamming(firStandardOrder + 1));
+firNotchDenominator = 1;
 
 %% Design FIR Low-Pass Filter
 firLowPassNumerator = fir1(firStandardOrder, 100 / (samplingFrequency / 2), 'low', hamming(firStandardOrder + 1));
@@ -135,14 +134,14 @@ disp(firLowPassNumerator(1:10));
 %% Verify Specs Compliance
 firHpSampleIndices = (0:firHighPassOrder);
 firStdSampleIndices = (0:firStandardOrder);
-notchSampleIndices = (0:2);
+notchSampleIndices = (0:firStandardOrder);
 
 hpPassbandGain = 20 * log10(abs(firHighPassNumerator * exp(-1j * 2 * pi * 10 / samplingFrequency * firHpSampleIndices)'));
 hpStopbandAttenuation_01 = 20 * log10(abs(firHighPassNumerator * exp(-1j * 2 * pi * 0.1 / samplingFrequency * firHpSampleIndices)'));
 lpPassbandGain = 20 * log10(abs(firLowPassNumerator * exp(-1j * 2 * pi * 90 / samplingFrequency * firStdSampleIndices)'));
 lpStopbandAttenuation = 20 * log10(abs(firLowPassNumerator * exp(-1j * 2 * pi * 150 / samplingFrequency * firStdSampleIndices)'));
 notchExactFreqVector = exp(-1j * 2 * pi * 50 / samplingFrequency * notchSampleIndices);
-notchExactAttenuation = 20 * log10(abs(firNotchNumerator * notchExactFreqVector') / abs(firNotchDenominator * notchExactFreqVector'));
+notchExactAttenuation = 20 * log10(abs(firNotchNumerator * notchExactFreqVector'));
 
 fprintf('\nFIR Specs Verification: \n');
 fprintf('HP passband gain at 10 Hz  : %.3f dB\n', hpPassbandGain);
