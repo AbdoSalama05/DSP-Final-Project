@@ -64,17 +64,36 @@ subplot(2, 2, 4);
 spectrogram(ecgCleanedFir, hamming(256), 128, 512, samplingFrequency, 'yaxis');
 title('Spectrogram (FIR)');
 
-%% SNR Calculation
+%% SNR Calculation (Correct Method)
+% Input SNR: ratio of clean signal power to added noise power
 addedNoise = noisyEcgSignal - cleanEcgSignal;
 inputSnrDb = 10 * log10(sum(cleanEcgSignal.^2) / sum(addedNoise.^2));
 
-residualNoiseButter = cleanEcgSignal - ecgCleanedButterworth;
-residualNoiseCheby = cleanEcgSignal - ecgCleanedChebyshev;
-residualNoiseFir = cleanEcgSignal - ecgCleanedFir;
+% Apply the same filter pipeline to the clean signal as a reference
 
-outputSnrButterworth = 10 * log10(sum(cleanEcgSignal.^2) / sum(residualNoiseButter.^2));
-outputSnrChebyshev = 10 * log10(sum(cleanEcgSignal.^2) / sum(residualNoiseCheby.^2));
-outputSnrFir = 10 * log10(sum(cleanEcgSignal.^2) / sum(residualNoiseFir.^2));
+% Butterworth reference
+cleanAfterButterworthHp = filtfilt(butterworthHpNumerator, butterworthHpDenominator, cleanEcgSignal);
+cleanAfterButterworthNotch = filtfilt(notchNumerator, notchDenominator, cleanAfterButterworthHp);
+cleanReferenceButter = filtfilt(butterworthLpNumerator, butterworthLpDenominator, cleanAfterButterworthNotch);
+
+% Chebyshev reference
+cleanAfterChebyshevHp = filtfilt(chebyshevHpNumerator, chebyshevHpDenominator, cleanEcgSignal);
+cleanAfterChebyshevNotch = filtfilt(chebyshevNotchNumerator, chebyshevNotchDenominator, cleanAfterChebyshevHp);
+cleanReferenceCheby = filtfilt(chebyshevLpNumerator, chebyshevLpDenominator, cleanAfterChebyshevNotch);
+
+% FIR reference
+cleanAfterFirHp = filtfilt(firHighPassNumerator, firHighPassDenominator, cleanEcgSignal);
+cleanAfterFirNotch = filtfilt(firNotchNumerator, firNotchDenominator, cleanAfterFirHp);
+cleanReferenceFir = filtfilt(firLowPassNumerator, firLowPassDenominator, cleanAfterFirNotch);
+
+% Output SNR: ratio of filtered clean signal power to residual noise power
+residualNoiseButter = cleanReferenceButter - ecgCleanedButterworth;
+residualNoiseCheby = cleanReferenceCheby - ecgCleanedChebyshev;
+residualNoiseFir = cleanReferenceFir - ecgCleanedFir;
+
+outputSnrButterworth = 10 * log10(sum(cleanReferenceButter.^2) / sum(residualNoiseButter.^2));
+outputSnrChebyshev = 10 * log10(sum(cleanReferenceCheby.^2) / sum(residualNoiseCheby.^2));
+outputSnrFir = 10 * log10(sum(cleanReferenceFir.^2) / sum(residualNoiseFir.^2));
 
 snrImprovementButterworth = outputSnrButterworth - inputSnrDb;
 snrImprovementChebyshev = outputSnrChebyshev - inputSnrDb;
